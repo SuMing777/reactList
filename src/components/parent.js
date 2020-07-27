@@ -1,17 +1,17 @@
 import React, { Component } from "react";
 import NavHeader from "./navHeader";
 import NavList from "./navList";
-import { sort, debounce, filter } from "../utils/common.js";
+import { debounce, filter, sort } from "../utils";
 import "./style.css";
 
 class Parent extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      activeIndex: 1,
-      btnActive: 1,
-      persons: [
+      viewSetting: "list", // list, grid 未来也许会有更多布局，用名字更直观
+      isDesc: false, // 这东西只是个布尔值，没必要用index
+      searchWord: "", // 搜索是把 searchWord的变化映射到UI到变化，所以searchWord是state
+      people: [
         { id: 1, text: "Aquamarine" },
         { id: 2, text: "Hotpink" },
         { id: 3, text: "Gold" },
@@ -23,54 +23,55 @@ class Parent extends Component {
         { id: 9, text: "Burlywood" },
         { id: 10, text: "orangered" },
       ],
-      personsAll: null,
     };
-    this.onChangeInputValue = debounce(this.onChangeInputValue, 500);
+    this.onChangeSearchWord = debounce(this.onChangeSearchWord, 500);
   }
 
   render() {
-    const { activeIndex, btnActive, personsAll, persons } = this.state;
+    const { viewSetting, isDesc, people, searchWord } = this.state;
     return (
       <div className="index">
+        <h3>双击列表可以删除</h3>
         <NavHeader
-          handleClickStyle={this.handleClickStyle}
-          activeIndex={activeIndex}
-          handleClickBtnStyle={this.handleClickBtnStyle}
-          btnActive={btnActive}
-          onChangeInputValue={this.onChangeInputValue}
+          setView={this.handleSetView}
+          viewSetting={viewSetting}
+          handleSetListOrder={this.handleSetListOrder}
+          isDesc={isDesc}
+          onChangeSearchWord={this.onChangeSearchWord}
         ></NavHeader>
         <NavList
-          handleClickStyle={this.handleClickStyle}
-          activeIndex={activeIndex}
-          handleClickBtnStyle={this.handleClickBtnStyle}
-          btnActive={btnActive}
-          persons={personsAll || persons}
+          viewSetting={viewSetting}
+          people={filter(people, searchWord)} // 不需要修改people，改成仅显示搜索结果即可
+          onDelete={this.handleDeleteList}
         ></NavList>
       </div>
     );
   }
 
-  handleClickStyle = index => {
+  handleSetView = (viewSetting) => {
     this.setState({
-      activeIndex: index,
+      viewSetting,
     });
   };
 
-  handleClickBtnStyle = (index, boolean) => {
-    const { persons } = this.state;
+  handleSetListOrder = (isDesc) => {
     this.setState({
-      btnActive: index,
-      personsAll: sort(persons, boolean),
+      isDesc,
+      people: sort(this.state.people, isDesc),
     });
   };
 
-  onChangeInputValue = value => {
-    const { persons } = this.state;
+  onChangeSearchWord = (searchWord) => {
     this.setState({
-      personsAll: filter(persons, value)
+      searchWord,
     });
   };
 
+  handleDeleteList = (id) => {
+    this.setState({
+      people: this.state.people.filter((p) => p.id !== id),
+    });
+  };
 }
 
 export default Parent;

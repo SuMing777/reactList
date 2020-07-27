@@ -1,27 +1,31 @@
 import React, { Component } from "react";
-import { listStyle } from "../utils/common.js";
+import { listStyleWithRandomColor } from "../utils";
+
+const classNames = {
+  list: "list-row",
+  grid: "list-row list-area",
+};
 
 class NavList extends Component {
-
   render() {
-    const { persons, activeIndex } = this.props;
+    const { people, viewSetting, onDelete } = this.props;
     return (
       <ul className="list-table">
-        {
-          persons.map((item) => {
-            return (
-              <li
-                key={item.id}
-                className={activeIndex === 1 ? "list-row" : "list-row list-area"}
-                style={listStyle()}
-              >{item.text}</li>
-            );
-          })
-        }
+        {people.map((item) => (
+          <li
+            key={item.id}
+            className={classNames[viewSetting]}
+            style={listStyleWithRandomColor()}
+            onDoubleClick={() => {
+              onDelete(item.id);
+            }}
+          >
+            {item.text}
+          </li>
+        ))}
       </ul>
     );
   }
-
 }
 
 export default NavList;
